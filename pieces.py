@@ -9,8 +9,9 @@ from abc import ABCMeta
 from abc import abstractmethod
 
 
-class Piece(object, metaclass=ABCMeta):
+class Piece(object):
 
+    __metaclass__ = ABCMeta
     name = 'piece'
     sign = '?'
     moveset = {}
@@ -21,14 +22,14 @@ class Piece(object, metaclass=ABCMeta):
         self.captured = type(self)
         self.color = color
         self.moves = getMoves(type(self).moveset, color)
-        
+
     def promote(self):
         return self.promotion(self.color)
-    
+
     def __repr__(self):
         color = 'gote' if self.color else 'sente'
         return '{} ({})'.format(self.name, color)
-    
+
     def __str__(self):
         orientation = ['/','\\'] if self.color else ['\\','/']
         return self.sign.join(orientation)
@@ -53,20 +54,9 @@ class Gold(Piece):
     name = 'gold general'
     sign = '金'
     moveset = {(0, 1): 1, (1, 1): 1, (1, 0): 1, (0, -1): 1, (-1, 0): 1, (-1, 1): 1}
-    
+
     def __init__(self, color):
         super(Gold, self).__init__(color)
-
-
-class Silver(Piece):
-
-    name = 'silver general'
-    sign = '銀'
-    moveset = {(0, 1): 1, (1, 1): 1, (1, -1): 1, (-1, -1): 1, (-1, 1): 1}
-    promotion = PromotedSilver
-
-    def __init__(self, color):
-        super(Silver, self).__init__(color)
 
 
 class PromotedSilver(Gold):
@@ -79,15 +69,15 @@ class PromotedSilver(Gold):
         self.captured = Silver
 
 
-class Bishop(Piece):
+class Silver(Piece):
 
-    name = 'bishop'
-    sign = '角'
-    moveset = {(1, 1): 8, (1, -1): 8, (-1, -1): 8, (-1, 1): 8}
-    promotion = Horse
+    name = 'silver general'
+    sign = '銀'
+    moveset = {(0, 1): 1, (1, 1): 1, (1, -1): 1, (-1, -1): 1, (-1, 1): 1}
+    promotion = PromotedSilver
 
     def __init__(self, color):
-        super(Bishop, self).__init__(color)
+        super(Silver, self).__init__(color)
 
 
 class Horse(Piece):
@@ -102,15 +92,15 @@ class Horse(Piece):
         self.captured = Bishop
 
 
-class Rook(Piece):
+class Bishop(Piece):
 
-    name = 'flying chariot'
-    sign = '飛'
-    moveset = {(0, 1): 8, (1, 0): 8, (0, -1): 8, (-1, 0): 8}
-    promotion = Dragon
+    name = 'bishop'
+    sign = '角'
+    moveset = {(1, 1): 8, (1, -1): 8, (-1, -1): 8, (-1, 1): 8}
+    promotion = Horse
 
     def __init__(self, color):
-        super(Rook, self).__init__(color)
+        super(Bishop, self).__init__(color)
 
 
 class Dragon(Piece):
@@ -125,6 +115,27 @@ class Dragon(Piece):
         self.captured = Rook
 
 
+class Rook(Piece):
+
+    name = 'flying chariot'
+    sign = '飛'
+    moveset = {(0, 1): 8, (1, 0): 8, (0, -1): 8, (-1, 0): 8}
+    promotion = Dragon
+
+    def __init__(self, color):
+        super(Rook, self).__init__(color)
+
+
+class PerfumedGeneral(Gold):
+
+    name = 'perfumed general'
+    sign = '杏'
+
+    def __init__(self, color):
+        super(PerfumedGeneral, self).__init__(color)
+        self.captured = Lance
+
+
 class Lance(Piece):
 
     name = 'lance'
@@ -136,14 +147,14 @@ class Lance(Piece):
         super(Lance, self).__init__(color)
 
 
-class PerfumedGeneral(Gold):
+class LaurelGeneral(Gold):
 
-    name = 'perfumed general'
-    sign = '杏'
+    name = 'laurel general'
+    sign = '圭'
 
     def __init__(self, color):
-        super(PerfumedGeneral, self).__init__(color)
-        self.captured = Lance
+        super(LaurelGeneral, self).__init__(color)
+        self.captured = Knight
 
 
 class Knight(Piece):
@@ -157,14 +168,14 @@ class Knight(Piece):
         super(Knight, self).__init__(color)
 
 
-class LaurelGeneral(Gold):
+class Tokin(Gold):
 
-    name = 'laurel general'
-    sign = '圭'
+    name = 'tokin'
+    sign = 'と'
 
     def __init__(self, color):
-        super(LaurelGeneral, self).__init__(color)
-        self.captured = Knight
+        super(Tokin, self).__init__(color)
+        self.captured = Pawn
 
 
 class Pawn(Piece):
@@ -178,19 +189,9 @@ class Pawn(Piece):
         super(Pawn, self).__init__(color)
 
 
-class Tokin(Gold):
-
-    name = 'tokin'
-    sign = 'と'
-
-    def __init__(self, color):
-        super(Tokin, self).__init__(color)
-        self.captured = Pawn
-
-
 def getMoves(moveset, color):
     out = moveset
-    if color:
+    if not color:
         out = {}
         for cardinals in moveset:
             out[(-cardinals[0], -cardinals[1])] = moveset[cardinals]
